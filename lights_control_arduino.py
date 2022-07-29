@@ -32,6 +32,15 @@ class Lights_control():
         """Green laser on
         """
         self.arduino.write(str.encode('2'))
+        print("Laser @ 561 nm On ")
+
+    
+    def blue_green(self):
+        """Blue and green laser on
+        """
+        self.arduino.write(str.encode('8'))
+       
+        print("Laser @ 488 and 561 nm On ")
 
     def dark(self):
         """Both lasers off
@@ -43,11 +52,6 @@ class Lights_control():
         """White light off
         """
         self.arduino.write(str.encode('3'))
-
-    def brightfield_on_100(self):
-        """White light on 100%
-        """
-        self.arduino.write(str.encode('7'))
 
     def brightfield_on_25(self):
         """White light on 25%
@@ -64,6 +68,36 @@ class Lights_control():
         """
         self.arduino.write(str.encode('6'))
 
+    def brightfield_on_100(self):
+        """White light on 100%
+        """
+        self.arduino.write(str.encode('7'))
+    
+    def high_power_widefield_opto(self, 
+                                  delay_start=None, 
+                                  train_interval=None, 
+                                  num_pulse=None, 
+                                  duty_cycle=None):
+        """Blue laser on and blinks high-power blue LED
+        """
+        #add letter to sort during capture of serial
+        self.arduino.write(str.encode('a' + str(delay_start))) #delayStart
+        time.sleep(1.1) # wait for Serial.parseInt() timer to run out before sending next serial, maybe make 1.1
+        self.arduino.write(str.encode('b' + str(train_interval))) #delayTime
+        time.sleep(1.1)
+        self.arduino.write(str.encode('c' + str(num_pulse))) #blinkFreq
+        time.sleep(1.1)
+        self.arduino.write(str.encode('d' + str(duty_cycle))) #dutyCycle
+        time.sleep(1.1)
+        self.arduino.write(str.encode('9'))
+        # do I insert a short pause here to let arduino catch up?
+        # test in the lab
+        # verify whether delayStart is correct in real life
+        # self.arduino.write(str.encode(str(delay_start)))
+        # self.arduino.write(str.encode(str(train_interval)))
+        # self.arduino.write(str.encode(str(num_pulse)))
+        # self.arduino.write(str.encode(str(duty_cycle)))
+    
     def close(self):
         """Close communication with arduino
         """

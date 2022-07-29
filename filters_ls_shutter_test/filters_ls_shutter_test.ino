@@ -2,6 +2,9 @@
 int data = 0; //will contain the byte that is read later on 
 int led_pin =  8; //blinking light led
 int light_pin = 11; // brightfield light led
+#define light_hp_led 13 // widefield opto led
+float frequency; // frequency in Hz
+float dutyCycle; // duty cycle (pulse width in percentage)
 int ledState = LOW;  //the state of the blinking light           
 unsigned long time_prev = 0; // a variable used to determine when to switch the state of the blinking light
 long interval = 0; //gives how long the on and off states of the blinking light are
@@ -17,7 +20,31 @@ void setup() {
   pinMode(2, OUTPUT);
   pinMode(light_pin, OUTPUT); //brightfield light
   pinMode(led_pin, OUTPUT); //blinking light
+  pinMode(light_hp_led, OUTPUT); //widefield opto led
+
+  //can we set this up via python?
+  frequency = 3; 
+  dutyCycle = 50;
 }
+
+void loop() {
+  double period = 1000000 / frequency
+  double offFor = period - (period *(dutyCycle/100))
+  double onFor = period - offFor
+
+  if (period > 16383) { //arduino microsectond timer is only reliable for periods > 16383, so other wise use a microsecond delay
+    digitalWrite(light_hp_led, HIGH);
+    delay(onFor/1000);
+    digitalWrite(light_hp_led, LOW);
+    delay(offFor/1000);
+  } else {
+    digitalWrite(light_hp_led, HIGH);
+    delayMicroseconds(onFor);
+    digitalWrite(light_hp_led, LOW);
+    delayMicroseconds(offFor);
+  }
+}
+
 void loop() {
   unsigned long time_now = millis(); //this one is to track the time. note that is does overflow after 50 days, so it might give some weird blink after a seriously long use of the arduino
   while (Serial.available()){ 
