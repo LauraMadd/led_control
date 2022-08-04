@@ -39,7 +39,8 @@ void widefieldOpto() { // function to blink widefield opto led
  timeNow = millis();
   if ((timeNow - delayStart) >= (trainInterval)) {
   delayStart += trainInterval; // add DELAY_TIME to reference point for next iteration
-    while (millis() < (delayStart + 1000)) { // this line causes trouble somehow, 999 vs. 1000 works better somehow?
+    if ((millis() >= delayStart) && (millis() < (delayStart + 1000))) {
+    // while (millis() < (delayStart + 1000)) { // this line causes trouble somehow, 999 vs. 1000 works better somehow?
       if (period > 16383) { // delay is accurate down to 16383 µs, for lower durations use delayMicroseconds
         digitalWrite(light_hp_led,HIGH);
         delay((onFor/1000) + 1); 

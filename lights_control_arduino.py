@@ -81,22 +81,26 @@ class Lights_control():
         """Blue laser on and blinks high-power blue LED
         """
         #add letter to sort during capture of serial
-        self.arduino.write(str.encode('a' + str(delay_start))) #delayStart
+        # self.arduino.write(str.encode('a' + str(delay_start))) #delayStart
+        # time.sleep(1.1) # wait for Serial.parseInt() timer to run out before sending next serial, maybe make 1.1
+        # self.arduino.write(str.encode('b' + str(train_interval))) #delayTime
+        # time.sleep(1.1)
+        # self.arduino.write(str.encode('c' + str(num_pulse))) #blinkFreq
+        # time.sleep(1.1)
+        # self.arduino.write(str.encode('d' + str(duty_cycle))) #dutyCycle
+        # time.sleep(1.1)
+        # self.arduino.write(str.encode('9'))
+
+        #add letter to sort during capture of serial
+        self.arduino.write(str.encode('a' + str(10000))) #delayStart
         time.sleep(1.1) # wait for Serial.parseInt() timer to run out before sending next serial, maybe make 1.1
-        self.arduino.write(str.encode('b' + str(train_interval))) #delayTime
+        self.arduino.write(str.encode('b' + str(2000))) #delayTime
         time.sleep(1.1)
-        self.arduino.write(str.encode('c' + str(num_pulse))) #blinkFreq
+        self.arduino.write(str.encode('c' + str(1))) #blinkFreq
         time.sleep(1.1)
-        self.arduino.write(str.encode('d' + str(duty_cycle))) #dutyCycle
+        self.arduino.write(str.encode('d' + str(10))) #dutyCycle
         time.sleep(1.1)
         self.arduino.write(str.encode('9'))
-        # do I insert a short pause here to let arduino catch up?
-        # test in the lab
-        # verify whether delayStart is correct in real life
-        # self.arduino.write(str.encode(str(delay_start)))
-        # self.arduino.write(str.encode(str(train_interval)))
-        # self.arduino.write(str.encode(str(num_pulse)))
-        # self.arduino.write(str.encode(str(duty_cycle)))
     
     def close(self):
         """Close communication with arduino
