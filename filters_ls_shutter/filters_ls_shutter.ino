@@ -39,18 +39,26 @@ void widefieldOpto() { // function to blink widefield opto led
  timeNow = millis();
   if ((timeNow - delayStart) >= (trainInterval)) {
   delayStart += trainInterval; // add DELAY_TIME to reference point for next iteration
-    if ((millis() >= delayStart) && (millis() < (delayStart + 1000))) {
-    // while (millis() < (delayStart + 1000)) { // this line causes trouble somehow, 999 vs. 1000 works better somehow?
+    //if ((millis() >= delayStart) && (millis() < (delayStart + 1000))) {
+    while (millis() < (delayStart + 1000)) { // this line causes trouble somehow, 999 vs. 1000 works better somehow?
       if (period > 16383) { // delay is accurate down to 16383 µs, for lower durations use delayMicroseconds
+        //digitalWrite(light_hp_led,HIGH);
+        //delay((onFor/1000) + 1); 
+        //digitalWrite(light_hp_led,LOW);
+        //delay((offFor/1000) + 1);
         digitalWrite(light_hp_led,HIGH);
-        delay((onFor/1000) + 1); 
+        delay((onFor/1000)); 
         digitalWrite(light_hp_led,LOW);
-        delay((offFor/1000) + 1);
+        delay((offFor/1000));
       } else {
+        //digitalWrite(light_hp_led,HIGH);
+        //delayMicroseconds(onFor + 10000);
+        //digitalWrite(light_hp_led,LOW);
+        //delayMicroseconds(offFor + 10000);
         digitalWrite(light_hp_led,HIGH);
-        delayMicroseconds(onFor + 10000);
+        delayMicroseconds(onFor);
         digitalWrite(light_hp_led,LOW);
-        delayMicroseconds(offFor + 10000);
+        delayMicroseconds(offFor);
       }
     }
   }
@@ -61,13 +69,13 @@ void parOpto() {
   if (data == 'a') {
     delayStart = Serial.parseInt();
   }
-  if (data == 'b') {
+  else if (data == 'b') {
     trainInterval = Serial.parseInt();
   }
-  if (data == 'c') {
+  else if (data == 'c') {
     numPulse = Serial.parseInt();
   }
-  if (data == 'd') {
+  else if (data == 'd') {
     dutyCycle = Serial.parseInt();
   }
   period = 1000000 / numPulse; // 1e6 µs divided by number of pulses within a single pulse train
@@ -82,48 +90,48 @@ void loop() {
         if (data == 'a' || data == 'b' || data == 'c' || data == 'd') { 
           parOpto();
         }
- }
+  }
  
- if (data == '0'){
-  blue.write(0);
-  green.write(0);
-  digitalWrite(light_hp_led,LOW);
-  optoRestart = true;
+  if (data == '0'){
+    blue.write(0);
+    green.write(0);
+    digitalWrite(light_hp_led,LOW);
+    optoRestart = true;
   }
- else if (data == '1'){ 
-  blue.write(20);
-  green.write(0);
+  else if (data == '1'){ 
+    blue.write(20);
+    green.write(0);
   }
- else if (data == '2'){
-  blue.write(0);
-  green.write(20);
+  else if (data == '2'){
+    blue.write(0);
+    green.write(20);
   }
- else if (data == '3'){ //led off
-  analogWrite(light_pin,0);
+  else if (data == '3'){ //led off
+    analogWrite(light_pin,0);
   }
- else if (data == '4'){  //led 25%
-  analogWrite(light_pin, 65);
+  else if (data == '4'){  //led 25%
+    analogWrite(light_pin, 65);
   }
- else if (data == '5'){  //led 50%
-  analogWrite(light_pin, 125);
+  else if (data == '5'){  //led 50%
+    analogWrite(light_pin, 125);
   }
- else if (data == '6'){  //led 75%
-  analogWrite(light_pin, 190);
+  else if (data == '6'){  //led 75%
+    analogWrite(light_pin, 190);
   }
- else if (data == '7'){  //led on
-  analogWrite(light_pin, 255);
+  else if (data == '7'){  //led on
+    analogWrite(light_pin, 255);
   }
- else if (data == '8'){
-  blue.write(20);
-  green.write(20);
+  else if (data == '8'){
+    blue.write(20);
+    green.write(20);
   }
- else if (data == '9'){ 
-  blue.write(20);
-  green.write(0);
-  if (optoRestart == true) {
-    delay(delayStart);
-    optoRestart = false;
-  }
-    widefieldOpto();  
+  else if (data == '9'){ 
+    blue.write(20);
+    green.write(0);
+    if (optoRestart == true) {
+      delay(delayStart);
+      optoRestart = false;
+    }
+      widefieldOpto();  
   }  
 }
