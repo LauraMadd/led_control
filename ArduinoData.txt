@@ -1,0 +1,11 @@
+Acclimatisation time (s) ;10
+Train interval (s) ;5
+Pulse frequency (Hz) ;1.00
+Duty cycle (%) ;20.00
+T start (min:sec:millisec); Tpulse (min:sec:millisec); Train number
+6420 ; 0:13:580 ; 1
+ ; 0:18:580 ; 2
+ ; 0:23:580 ; 3
+ ; 0:28:580 ; 4
+ ; 0:33:580 ; 5
+ ; 0:38:580 ; 6

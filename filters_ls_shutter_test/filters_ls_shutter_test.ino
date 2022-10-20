@@ -2,14 +2,30 @@
 int data = 0; //will contain the byte that is read later on 
 int led_pin =  8; //blinking light led
 int light_pin = 11; // brightfield light led
-#define light_hp_led 13 // widefield opto led
-float frequency; // frequency in Hz
-float dutyCycle; // duty cycle (pulse width in percentage)
-int ledState = LOW;  //the state of the blinking light           
-unsigned long time_prev = 0; // a variable used to determine when to switch the state of the blinking light
+int ledState = LOW;  //the state of the blinking light   
+// unsigned long time_prev = 0; // a variable used to determine when to switch the state of the blinking light
 long interval = 0; //gives how long the on and off states of the blinking light are
 Servo blue;
-Servo green;           
+Servo green;
+
+// variables for widefield opto led
+#define light_hp_led 9 // widefield opto led
+long timeNow; // keeps track of current time
+long trainInterval; // interval between pulse trains in ms
+long delayStart; // amount of time before opto stimulus protocol is started in ms
+double period; // 
+double offFor;
+double onFor;
+float numPulse;
+float dutyCycle;
+bool optoRestart;       
+unsigned long tStart; // keeps track of when experiment started
+unsigned long tPulse; // keeps track of when a light pulse is generated
+bool pulsetimeBool;
+
+// variables for pump controller
+#define pumpControl 2
+float pumpSpeed; // controls the pumping speed
 
 void setup() {
   Serial.begin(9600);
@@ -21,89 +37,110 @@ void setup() {
   pinMode(light_pin, OUTPUT); //brightfield light
   pinMode(led_pin, OUTPUT); //blinking light
   pinMode(light_hp_led, OUTPUT); //widefield opto led
-
-  //can we set this up via python?
-  frequency = 3; 
-  dutyCycle = 50;
+  pinMode(pumpControl, OUTPUT); //pump controller
+  optoRestart = true;
 }
 
-void loop() {
-  double period = 1000000 / frequency
-  double offFor = period - (period *(dutyCycle/100))
-  double onFor = period - offFor
+void parOpto() {
+  // receives parameter values through PySerial
+  //if (data == 'b') {
+    delayStart = 0;//Serial.parseInt();
+ // }
+  //else if (data == 'c') {
+    trainInterval = 2000;//Serial.parseInt();
+ // }
+ // else if (data == 'd') {
+    numPulse = 1;//Serial.parseInt();
+  //}
+ // else if (data == 'e') {
+    dutyCycle = 20;//Serial.parseInt();
+ // }
+  period = 1000000 / numPulse; // 1e6 µs divided by number of pulses within a single pulse train
+  offFor = period - (period * (dutyCycle/100)); // duration spent off in µs
+  onFor = period - offFor; // duration spent on in µs
+}
 
-  if (period > 16383) { //arduino microsectond timer is only reliable for periods > 16383, so other wise use a microsecond delay
-    digitalWrite(light_hp_led, HIGH);
-    delay(onFor/1000);
-    digitalWrite(light_hp_led, LOW);
-    delay(offFor/1000);
-  } else {
-    digitalWrite(light_hp_led, HIGH);
-    delayMicroseconds(onFor);
-    digitalWrite(light_hp_led, LOW);
-    delayMicroseconds(offFor);
+void widefieldOpto() { // function to blink widefield opto led
+  timeNow = millis();
+  if ((timeNow - delayStart) >= (trainInterval)) {
+  delayStart += trainInterval; // add DELAY_TIME to reference point for next iteration
+  Serial.println("g");
+  }
+  while (millis() < (delayStart + 1000)) {
+    if (period > 16383) { // delay is accurate down to 16383 µs, for lower durations use delayMicroseconds
+      tPulse = millis(); //This will not work if we are stuck in while loop!
+      Serial.println(tPulse);
+      digitalWrite(light_hp_led,HIGH);
+      delay((onFor/1000)); 
+      digitalWrite(light_hp_led,LOW);
+      delay((offFor/1000));
+    } else {
+      tPulse = millis();
+      Serial.println(tPulse);
+      digitalWrite(light_hp_led,HIGH);
+      delayMicroseconds(onFor);
+      digitalWrite(light_hp_led,LOW);
+      delayMicroseconds(offFor);
+    }
   }
 }
 
 void loop() {
-  unsigned long time_now = millis(); //this one is to track the time. note that is does overflow after 50 days, so it might give some weird blink after a seriously long use of the arduino
   while (Serial.available()){ 
-        data = Serial.read();
-        //commands for the blinking light always start with t, so it is possible to send additional data
-        if(data =='t'){
-          interval = Serial.parseInt(); //the additional data is read as an integer
-        }
+    data = Serial.read();
+  }
+  if (data == 'a' || data == 'b' || data == 'c' || data == 'd') { // sets parameters for BL opto led  if "b-e" is received
+    parOpto();
+  }
+  if (data == '0'){
+    blue.write(0);
+    green.write(0);
+    digitalWrite(light_hp_led,LOW);
+    optoRestart = true;
+  }
+  else if (data == '1'){ 
+    blue.write(20);
+    green.write(0);
+  }
+  else if (data == '2'){
+    blue.write(0);
+    green.write(20);
+  }
+  else if (data == '3'){ //led off
+    analogWrite(light_pin,0);
+  }
+  else if (data == '4'){  //led 25%
+    analogWrite(light_pin, 65);
+  }
+  else if (data == '5'){  //led 50%
+    analogWrite(light_pin, 125);
+  }
+  else if (data == '6'){  //led 75%
+    analogWrite(light_pin, 190);
+  }
+  else if (data == '7'){  //led on
+    analogWrite(light_pin, 255);
+  }
+  else if (data == '8'){
+    blue.write(20);
+    green.write(20);
+  }
+  else if (data == '9'){ 
+    blue.write(20);
+    green.write(0);
+    if (optoRestart == true) {
+      parOpto();
+      tStart = millis();
+      Serial.print("f"); // sends signal to communicate with Python
+      delay(delayStart);
+      optoRestart = false;
     }
- if (data == '0'){
-  blue.write(0);
-  green.write(0);
+      widefieldOpto();  
   }
- else if (data == '1'){ 
-  blue.write(20);
-  green.write(0);
+  else if (data == 'k'){
+    digitalWrite(pumpControl,HIGH);
   }
- else if (data == '2'){
-  blue.write(0);
-  green.write(20);
+  else if (data == 'l'){
+    digitalWrite(pumpControl,LOW);
   }
- else if (data == '3'){ //led off
-  analogWrite(light_pin,0);
-  }
- else if (data == '4'){  //led 25%
-  analogWrite(light_pin, 65);
-  }
- else if (data == '5'){  //led 50%
-  analogWrite(light_pin, 125);
-  }
- else if (data == '6'){  //led 75%
-  analogWrite(light_pin, 190);
-  }
- else if (data == '7'){  //led on
-  analogWrite(light_pin, 255);
-  }
- else if (data == '8'){
-  blue.write(20);
-  green.write(20);
-  }
-  if(interval > 0){
-    //interval > 0 corresponds to the state of the led where it is on and off equally long
-    if (time_now - time_prev >= interval) {
-      time_prev = time_now;
-      if (ledState == LOW) {
-        ledState = HIGH;
-      } else {
-        ledState = LOW;
-      }
-      digitalWrite(led_pin, ledState);
-      //to keep track of when it needs to switch to a different state, the distance between the previous value and the current value is determined compared with interval, and if it is bigger, then it is  time to switch
-    }
-  }
-  else if (interval == 0){
-    // interval == 0 corresponds to the continiously off state of the led
-  digitalWrite(led_pin, LOW);
-}
-else{
-  //this only is checked if interval < 0 and it corresponds to the continiously off state of the led
-  digitalWrite(led_pin, HIGH);
-}
 }
