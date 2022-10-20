@@ -148,7 +148,7 @@ void widefieldOpto() { // function to blink widefield opto led
   timeNow = millis();
   if ((timeNow - delayStart) >= (trainInterval)) {
     delayStart += trainInterval; // add DELAY_TIME to reference point for next iteration
-    timeBool = true; // allows counting pulse train number
+    timeBool = true; // allows counting pulse train number once per pulse train
     while (millis() < (delayStart + 1000)) { // must be 999, sometimes protocol fires early by 1 ms (1 Hz)
       if (period > 16383) { // delay is accurate down to 16383 µs, for lower durations use delayMicroseconds
         printTime();

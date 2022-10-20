@@ -80,37 +80,37 @@ class Test():
         """
         self.arduino.write(str.encode('7'))
     
-    # def high_power_widefield_opto(self, 
-                                #   delay_start=None, 
-                                #   train_interval=None, 
-                                #   num_pulse=None, 
-                                #   duty_cycle=None):
-    def test(self, 
-            delay_start=None, 
-            train_interval=None, 
-            num_pulse=None, 
-            duty_cycle=None):
+    def high_power_widefield_opto(self, 
+                                  delay_start=None, 
+                                  train_interval=None, 
+                                  num_pulse=None, 
+                                  duty_cycle=None):
+    # def test(self, 
+    #         delay_start=None, 
+    #         train_interval=None, 
+    #         num_pulse=None, 
+    #         duty_cycle=None):
 
         """Blue laser on and blinks high-power blue LED
         """
         
-        # self.arduino.write(str.encode('a' + str(delay_start))) 
-        # time.sleep(1.1) # wait for Serial.parseInt() timer to run out before sending next serial, maybe make 1.1
-        # self.arduino.write(str.encode('b' + str(train_interval))) 
-        # time.sleep(1.1)
-        # self.arduino.write(str.encode('c' + str(num_pulse))) 
-        # time.sleep(1.1)
-        # self.arduino.write(str.encode('d' + str(duty_cycle))) 
-        # time.sleep(1.1)
+        self.arduino.write(str.encode('a' + str(delay_start))) 
+        time.sleep(1.1) # wait for Serial.parseInt() timer to run out before sending next serial, maybe make 1.1
+        self.arduino.write(str.encode('b' + str(train_interval))) 
+        time.sleep(1.1)
+        self.arduino.write(str.encode('c' + str(num_pulse))) 
+        time.sleep(1.1)
+        self.arduino.write(str.encode('d' + str(duty_cycle))) 
+        time.sleep(1.1)
 
-        self.arduino.write(str.encode('a' + str(10000))) 
-        time.sleep(1.5) # wait for Serial.parseInt() timer to run out before sending next serial, maybe make 1.1
-        self.arduino.write(str.encode('b' + str(5000))) 
-        time.sleep(1.5)
-        self.arduino.write(str.encode('c' + str(1))) 
-        time.sleep(1.5)
-        self.arduino.write(str.encode('d' + str(20))) 
-        time.sleep(1.5)
+        # self.arduino.write(str.encode('a' + str(10000))) 
+        # time.sleep(1.5) # wait for Serial.parseInt() timer to run out before sending next serial, maybe make 1.1
+        # self.arduino.write(str.encode('b' + str(5000))) 
+        # time.sleep(1.5)
+        # self.arduino.write(str.encode('c' + str(1))) 
+        # time.sleep(1.5)
+        # self.arduino.write(str.encode('d' + str(20))) 
+        # time.sleep(1.5)
         
         self.textfile = open('ArduinoData.txt', 'w')
 
